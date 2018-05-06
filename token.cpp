@@ -41,6 +41,10 @@ std::string Token::getTokenName(const Type& tokenType) {
 		return ">";
 	case Type::LessThan:
 		return "<";
+	case Type::Equal:
+		return "==";
+	case Type::NotEqual:
+		return "!=";
 
 
 	case Type::Comma:

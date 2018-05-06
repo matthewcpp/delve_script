@@ -21,6 +21,7 @@ namespace Delve { namespace Script{
 
 		void readNextChar();
 		void skipWhitespace();
+		char peekNextChar() const;
 
 		std::string_view readNextIdentifier();
 		std::string_view readNextNumber();

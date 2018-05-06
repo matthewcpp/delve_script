@@ -147,6 +147,27 @@ TEST(Lexer, SimpleFunctionStatement)
 	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
 }
 
+/*
+* Tests that the lexer can handle token that are ocmprise dof two characters
+*/
+TEST(Lexer, TwoCharacterTokens)
+{
+	std::string input = "==\n!=";
+	
+	std::vector<Token::Type> expectedTokens = {
+		Token::Type::Equal, Token::Type::NotEqual, Token::Type::Eof
+	};
+
+	std::vector<std::string> expectedLiterals = {
+		"==", "!=", ""
+	};
+
+	Delve::Script::Lexer lexer(input);
+	lexer.tokenize();
+
+	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
+}
+
 void compareTokenTypeAndValues(const Lexer& lexer, const std::vector<Delve::Script::Token::Type>& expectedTokens, const std::vector<std::string>& expectedLiterals)
 {
 	ASSERT_EQ(expectedTokens.size(), expectedLiterals.size());

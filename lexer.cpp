@@ -29,6 +29,21 @@ namespace Delve { namespace Script {
 	}
 
 	/*
+	* Returns the next character in the input stream or 0 if EOF is reached.  Does not advance readPosition.
+	* @returns next character in the input stream
+	*/
+	char Lexer::peekNextChar() const 
+	{
+		if (readPosition < input.length()) {
+			return input[readPosition];
+		}
+		else {
+			return 0;
+		}
+	}
+
+
+	/*
 	* Parses the next token from the input stream.  Returns a token with Token::Type::Eof when the end of the input is reached.
 	* After Eof is reached, this function will continue to return Eof tokens on sucessive calls.
 	*/
@@ -42,10 +57,19 @@ namespace Delve { namespace Script {
 
 		switch (currentChar)
 		{
-		case '=':
-			token->type = Token::Type::Assign;
-			token->literal = std::string_view(input.data() + position, 1);
+		case '=': {
+			char nextChar = peekNextChar();
+			if (nextChar == '=') {
+				token->type = Token::Type::Equal;
+				token->literal = std::string_view(input.data() + position, 2);
+				readNextChar();
+			}
+			else {
+				token->type = Token::Type::Assign;
+				token->literal = std::string_view(input.data() + position, 1);
+			}
 			break;
+		}
 		case ';':
 			token->type = Token::Type::Semicolon;
 			token->literal = std::string_view(input.data() + position, 1);
@@ -78,10 +102,19 @@ namespace Delve { namespace Script {
 			token->type = Token::Type::Divide;
 			token->literal = std::string_view(input.data() + position, 1);
 			break;
-		case '!':
-			token->type = Token::Type::Negate;
-			token->literal = std::string_view(input.data() + position, 1);
+		case '!': {
+			char nextChar = peekNextChar();
+			if (nextChar == '=') {
+				token->type = Token::Type::NotEqual;
+				token->literal = std::string_view(input.data() + position, 2);
+				readNextChar();
+			}
+			else {
+				token->type = Token::Type::Negate;
+				token->literal = std::string_view(input.data() + position, 1);
+			}
 			break;
+		}
 		case '>':
 			token->type = Token::Type::GreaterThan;
 			token->literal = std::string_view(input.data() + position, 1);

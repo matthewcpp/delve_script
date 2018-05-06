@@ -35,6 +35,8 @@ struct Token
 		// Comparisons
 		GreaterThan,
 		LessThan,
+		Equal,
+		NotEqual,
 
 		// Delimiters
 		Comma,

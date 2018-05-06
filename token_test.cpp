@@ -23,6 +23,12 @@ TEST(Token, getTokenName) {
 	EXPECT_EQ(Token::getTokenName(Token::Type::Minus), "-");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Multiply), "*");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Divide), "/");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Negate), "!");
+
+	EXPECT_EQ(Token::getTokenName(Token::Type::GreaterThan), ">");
+	EXPECT_EQ(Token::getTokenName(Token::Type::LessThan), "<");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Equal), "==");
+	EXPECT_EQ(Token::getTokenName(Token::Type::NotEqual), "!=");
 
 	EXPECT_EQ(Token::getTokenName(Token::Type::Comma), ",");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Semicolon), ";");
