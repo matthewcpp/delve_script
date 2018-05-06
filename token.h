@@ -20,6 +20,14 @@ struct Token
 		// Operators
 		Assign,
 		Plus,
+		Minus,
+		Multiply,
+		Divide,
+		Negate,
+
+		// Comparisons
+		GreaterThan,
+		LessThan,
 
 		// Delimiters
 		Comma,

@@ -19,6 +19,19 @@ std::string Token::getTokenName(const Type& tokenType) {
 		return "=";
 	case Type::Plus:
 		return "+";
+	case Type::Minus:
+		return "-";
+	case Type::Multiply:
+		return "*";
+	case Type::Divide:
+		return "/";
+	case Type::Negate:
+		return "!";
+
+	case Type::GreaterThan:
+		return ">";
+	case Type::LessThan:
+		return "<";
 
 
 	case Type::Comma:

@@ -14,6 +14,9 @@ TEST(Token, getTokenName) {
 
 	EXPECT_EQ(Token::getTokenName(Token::Type::Assign), "=");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Plus), "+");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Minus), "-");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Multiply), "*");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Divide), "/");
 
 	EXPECT_EQ(Token::getTokenName(Token::Type::Comma), ",");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Semicolon), ";");

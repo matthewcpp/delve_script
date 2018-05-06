@@ -33,7 +33,7 @@ TEST(Lexer, NextTokenEmpty)
 */
 TEST(Lexer, SingleCharacterTokens)
 {
-	std::string input = "=+(){},;";
+	std::string input = "=+-*/!<>(){},;";
 
 	Delve::Script::Lexer lexer(input);
 	lexer.tokenize();
@@ -41,7 +41,8 @@ TEST(Lexer, SingleCharacterTokens)
 	const auto& tokens = lexer.tokens();
 
 	std::vector<Delve::Script::Token::Type> expectedTokens = {
-		Token::Type::Assign, Token::Type::Plus, Token::Type::LParen, Token::Type::RParen,
+		Token::Type::Assign, Token::Type::Plus, Token::Type::Minus, Token::Type::Multiply, Token::Type::Divide, 
+		Token::Type::Negate, Token::Type::LessThan, Token::Type::GreaterThan, Token::Type::LParen, Token::Type::RParen,
 		Token::Type::LBrace, Token::Type::RBrace, Token::Type::Comma, Token::Type::Semicolon, Token::Type::Eof
 	};
 

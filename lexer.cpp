@@ -66,6 +66,30 @@ namespace Delve { namespace Script {
 			token->type = Token::Type::Plus;
 			token->literal = std::string_view(input.data() + position, 1);
 			break;
+		case '-':
+			token->type = Token::Type::Minus;
+			token->literal = std::string_view(input.data() + position, 1);
+			break;
+		case '*':
+			token->type = Token::Type::Multiply;
+			token->literal = std::string_view(input.data() + position, 1);
+			break;
+		case '/':
+			token->type = Token::Type::Divide;
+			token->literal = std::string_view(input.data() + position, 1);
+			break;
+		case '!':
+			token->type = Token::Type::Negate;
+			token->literal = std::string_view(input.data() + position, 1);
+			break;
+		case '>':
+			token->type = Token::Type::GreaterThan;
+			token->literal = std::string_view(input.data() + position, 1);
+			break;
+		case '<':
+			token->type = Token::Type::LessThan;
+			token->literal = std::string_view(input.data() + position, 1);
+			break;
 		case '{':
 			token->type = Token::Type::LBrace;
 			token->literal = std::string_view(input.data() + position, 1);
