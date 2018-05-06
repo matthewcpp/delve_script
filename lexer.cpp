@@ -185,7 +185,8 @@ namespace Delve { namespace Script {
 
 	// This map holds all the language keywords
 	std::unordered_map<std::string, Token::Type> Lexer::keywords = { 
-		{"function", Token::Type::Function}, {"let", Token::Type::Let} 
+		{"function", Token::Type::Function}, {"let", Token::Type::Let}, {"true", Token::Type::True}, {"false", Token::Type::False},
+		{"if", Token::Type::If}, {"else", Token::Type::Else}, {"return", Token::Type::Return}
 	};
 
 	/*

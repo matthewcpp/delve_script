@@ -16,6 +16,13 @@ struct Token
 		// Identifiers and Literals
 		Identifier,
 		Integer,
+		True,
+		False,
+
+		// Control
+		If,
+		Else,
+		Return,
 
 		// Operators
 		Assign,

@@ -8,12 +8,21 @@ std::string Token::getTokenName(const Type& tokenType) {
 	case Type::Eof:
 		return "Eof";
 
-
 	case Type::Identifier:
 		return "Identifier";
 	case Type::Integer:
 		return "Int";
+	case Type::True:
+		return "True";
+	case Type::False:
+		return "False";
 
+	case Type::If:
+		return "If";
+	case Type::Else:
+		return "Else";
+	case Type::Return:
+		return "Return";
 
 	case Type::Assign:
 		return "=";

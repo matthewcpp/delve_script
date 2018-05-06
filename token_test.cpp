@@ -11,6 +11,12 @@ TEST(Token, getTokenName) {
 
 	EXPECT_EQ(Token::getTokenName(Token::Type::Identifier), "Identifier");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Integer), "Int");
+	EXPECT_EQ(Token::getTokenName(Token::Type::True), "True");
+	EXPECT_EQ(Token::getTokenName(Token::Type::False), "False");
+
+	EXPECT_EQ(Token::getTokenName(Token::Type::If), "If");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Else), "Else");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Return), "Return");
 
 	EXPECT_EQ(Token::getTokenName(Token::Type::Assign), "=");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Plus), "+");

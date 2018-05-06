@@ -68,7 +68,7 @@ TEST(Lexer, SingleCharacterTokens)
 */
 TEST(Lexer, Keywords)
 {
-	std::string input = "let\nfunction\n";
+	std::string input = "let\nfunction\ntrue\nfalse\nif\nelse\nreturn\n";
 
 	Delve::Script::Lexer lexer(input);
 	lexer.tokenize();
@@ -76,11 +76,11 @@ TEST(Lexer, Keywords)
 	const auto& tokens = lexer.tokens();
 
 	std::vector<Token::Type> expectedTokens = {
-		Token::Type::Let, Token::Type::Function, Token::Type::Eof
+		Token::Type::Let, Token::Type::Function, Token::Type::True, Token::Type::False, Token::Type::If, Token::Type::Else, Token::Type::Return, Token::Type::Eof
 	};
 
 	std::vector<std::string> expectedLiterals = {
-		"let", "function", ""
+		"let", "function", "true", "false", "if", "else", "return", ""
 	};
 
 	ASSERT_EQ(tokens.size(), expectedTokens.size());
@@ -129,16 +129,16 @@ TEST(Lexer, SimpleLetStatement)
 */
 TEST(Lexer, SimpleFunctionStatement)
 {
-	std::string input = "function(x, y) {\r\n x + y; \r\n}";
+	std::string input = "function(x, y) {\r\nreturn x + y; \r\n}";
 
 	std::vector<Token::Type> expectedTokens = {
 		Token::Type::Function, Token::Type::LParen, Token::Type::Identifier, Token::Type::Comma,
-		Token::Type::Identifier, Token::Type::RParen, Token::Type::LBrace, Token::Type::Identifier,
+		Token::Type::Identifier, Token::Type::RParen, Token::Type::LBrace, Token::Type::Return, Token::Type::Identifier,
 		Token::Type::Plus, Token::Type::Identifier, Token::Type::Semicolon, Token::Type::RBrace, Token::Type::Eof
 	};
 
 	std::vector<std::string> expectedLiterals = {
-		"function", "(", "x", ",", "y", ")", "{", "x", "+", "y", ";", "}", ""
+		"function", "(", "x", ",", "y", ")", "{", "return", "x", "+", "y", ";", "}", ""
 	};
 
 	Delve::Script::Lexer lexer(input);
