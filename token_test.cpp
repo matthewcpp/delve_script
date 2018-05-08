@@ -6,17 +6,17 @@
 TEST(Token, getTokenName) {
 	using namespace Delve::Script;
 
-	EXPECT_EQ(Token::getTokenName(Token::Type::Illegal), "Illegal");
-	EXPECT_EQ(Token::getTokenName(Token::Type::Eof), "Eof");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Illegal), "illegal");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Eof), "eof");
 
-	EXPECT_EQ(Token::getTokenName(Token::Type::Identifier), "Identifier");
-	EXPECT_EQ(Token::getTokenName(Token::Type::Integer), "Int");
-	EXPECT_EQ(Token::getTokenName(Token::Type::True), "True");
-	EXPECT_EQ(Token::getTokenName(Token::Type::False), "False");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Identifier), "identifier");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Integer), "int");
+	EXPECT_EQ(Token::getTokenName(Token::Type::True), "true");
+	EXPECT_EQ(Token::getTokenName(Token::Type::False), "false");
 
-	EXPECT_EQ(Token::getTokenName(Token::Type::If), "If");
-	EXPECT_EQ(Token::getTokenName(Token::Type::Else), "Else");
-	EXPECT_EQ(Token::getTokenName(Token::Type::Return), "Return");
+	EXPECT_EQ(Token::getTokenName(Token::Type::If), "if");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Else), "else");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Return), "return");
 
 	EXPECT_EQ(Token::getTokenName(Token::Type::Assign), "=");
 	EXPECT_EQ(Token::getTokenName(Token::Type::Plus), "+");
@@ -38,6 +38,6 @@ TEST(Token, getTokenName) {
 	EXPECT_EQ(Token::getTokenName(Token::Type::LBrace), "{");
 	EXPECT_EQ(Token::getTokenName(Token::Type::RBrace), "}");
 
-	EXPECT_EQ(Token::getTokenName(Token::Type::Function), "Function");
-	EXPECT_EQ(Token::getTokenName(Token::Type::Let), "Let");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Function), "function");
+	EXPECT_EQ(Token::getTokenName(Token::Type::Let), "let");
 }

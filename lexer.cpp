@@ -160,7 +160,7 @@ namespace Delve { namespace Script {
 		readNextChar();
 	}
 
-	/*
+	/**
 	* turns the input text into a token vector.  Stops parsing when an illegal token is encountered or the file is complete.
 	*/
 	void Lexer::tokenize()

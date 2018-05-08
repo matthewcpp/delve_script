@@ -2,27 +2,32 @@
 
 namespace Delve { namespace Script {
 
+/**
+* Returns a String representation of a TokenType enumeration.
+* @param tokenType token to retrieve string representation for.
+* @returns string representation for supplied token type.
+*/
 std::string Token::getTokenName(const Type& tokenType) {
 	switch (tokenType)
 	{	
 	case Type::Eof:
-		return "Eof";
+		return "eof";
 
 	case Type::Identifier:
-		return "Identifier";
+		return "identifier";
 	case Type::Integer:
-		return "Int";
+		return "int";
 	case Type::True:
-		return "True";
+		return "true";
 	case Type::False:
-		return "False";
+		return "false";
 
 	case Type::If:
-		return "If";
+		return "if";
 	case Type::Else:
-		return "Else";
+		return "else";
 	case Type::Return:
-		return "Return";
+		return "return";
 
 	case Type::Assign:
 		return "=";
@@ -63,12 +68,12 @@ std::string Token::getTokenName(const Type& tokenType) {
 
 
 	case Type::Function:
-		return "Function";
+		return "function";
 	case Type::Let:
-		return "Let";
+		return "let";
 
 	default:
-		return "Illegal";
+		return "illegal";
 	}
 }
 
