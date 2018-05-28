@@ -15,7 +15,6 @@ void compareTokenTypeAndValues(const Lexer& lexer, const std::vector<Delve::Scri
 TEST(Lexer, NextTokenEmpty)
 {
 	Delve::Script::Lexer lexer("");
-	lexer.tokenize();
 
 	const auto& tokens = lexer.tokens();
 	ASSERT_EQ(tokens.size(), 1);
@@ -36,7 +35,6 @@ TEST(Lexer, SingleCharacterTokens)
 	std::string input = "=+-*/!<>(){},;";
 
 	Delve::Script::Lexer lexer(input);
-	lexer.tokenize();
 
 	const auto& tokens = lexer.tokens();
 
@@ -71,7 +69,6 @@ TEST(Lexer, Keywords)
 	std::string input = "let\nfunction\ntrue\nfalse\nif\nelse\nreturn\n";
 
 	Delve::Script::Lexer lexer(input);
-	lexer.tokenize();
 
 	const auto& tokens = lexer.tokens();
 
@@ -119,7 +116,6 @@ TEST(Lexer, SimpleLetStatement)
 	};
 
 	Delve::Script::Lexer lexer(input);
-	lexer.tokenize();
 
 	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
 }
@@ -142,7 +138,6 @@ TEST(Lexer, SimpleFunctionStatement)
 	};
 
 	Delve::Script::Lexer lexer(input);
-	lexer.tokenize();
 
 	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
 }
@@ -163,7 +158,6 @@ TEST(Lexer, TwoCharacterTokens)
 	};
 
 	Delve::Script::Lexer lexer(input);
-	lexer.tokenize();
 
 	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
 }

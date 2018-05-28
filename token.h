@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 #include <stdint.h>
 
 namespace Delve { namespace Script {
@@ -55,7 +54,7 @@ struct Token
 	Type type;
 	uint16_t lineNum;
 	uint16_t colNum;
-	std::string_view literal;
+	std::string literal;
 
 	Token():type(Type::Illegal), lineNum(0), colNum(0) {}
 	static std::string getTokenName(const Type& tokenType);

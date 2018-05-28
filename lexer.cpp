@@ -6,8 +6,46 @@ namespace Delve { namespace Script {
 	Lexer::Lexer(const std::string& inputStr)
 		:currentLine(1), currentCol(0), currentChar(EOF), position(0), readPosition(0)
 	{
-		input = inputStr;
-		readNextChar();
+		init();
+		tokenize(inputStr);
+	}
+
+	Lexer::Lexer()
+	{
+		init();
+	}
+
+	void Lexer::init()
+	{
+		currentLine = 0;
+		currentCol = 0;
+		currentChar = EOF;
+		position = 0;
+		readPosition = 0;
+	}
+
+	/**
+	* Gets the number of tokens in the internal token list
+	* @retuns the number of tokens in the internal list
+	*/
+	size_t Lexer::tokenCount() const
+	{
+		return tokenVec.size();
+	}
+
+	/**
+	* Gets a token at a given position from the internal token list
+	* @param index index of token to get
+	* @returns token at the given index or nullptr if index is out of range
+	*/
+	const Token* Lexer::getToken(size_t index) const
+	{
+		if (index < tokenVec.size()) {
+			return tokenVec[index].get();
+		}
+		else {
+			return nullptr;
+		}
 	}
 
 	/*
@@ -61,75 +99,75 @@ namespace Delve { namespace Script {
 			char nextChar = peekNextChar();
 			if (nextChar == '=') {
 				token->type = Token::Type::Equal;
-				token->literal = std::string_view(input.data() + position, 2);
+				token->literal = tokenLiterals[token->type];
 				readNextChar();
 			}
 			else {
 				token->type = Token::Type::Assign;
-				token->literal = std::string_view(input.data() + position, 1);
+				token->literal = tokenLiterals[token->type];
 			}
 			break;
 		}
 		case ';':
 			token->type = Token::Type::Semicolon;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '(':
 			token->type = Token::Type::LParen;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case ')':
 			token->type = Token::Type::RParen;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case ',':
 			token->type = Token::Type::Comma;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '+':
 			token->type = Token::Type::Plus;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '-':
 			token->type = Token::Type::Minus;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '*':
 			token->type = Token::Type::Multiply;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '/':
 			token->type = Token::Type::Divide;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '!': {
 			char nextChar = peekNextChar();
 			if (nextChar == '=') {
 				token->type = Token::Type::NotEqual;
-				token->literal = std::string_view(input.data() + position, 2);
+				token->literal = tokenLiterals[token->type];
 				readNextChar();
 			}
 			else {
 				token->type = Token::Type::Negate;
-				token->literal = std::string_view(input.data() + position, 1);
+				token->literal = tokenLiterals[token->type];
 			}
 			break;
 		}
 		case '>':
 			token->type = Token::Type::GreaterThan;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '<':
 			token->type = Token::Type::LessThan;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '{':
 			token->type = Token::Type::LBrace;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case '}':
 			token->type = Token::Type::RBrace;
-			token->literal = std::string_view(input.data() + position, 1);
+			token->literal = tokenLiterals[token->type];
 			break;
 		case 0:
 			token->type = Token::Type::Eof;
@@ -163,8 +201,12 @@ namespace Delve { namespace Script {
 	/**
 	* turns the input text into a token vector.  Stops parsing when an illegal token is encountered or the file is complete.
 	*/
-	void Lexer::tokenize()
+	void Lexer::tokenize(const std::string& inputStr)
 	{
+		currentLine = 1;
+		input = inputStr;
+		readNextChar();
+
 		while (true) {
 			nextToken();
 
@@ -201,7 +243,7 @@ namespace Delve { namespace Script {
 	* the final letter of the identifier when this method returns.
 	* @return string of the next identifier name in the input string
 	*/
-	std::string_view Lexer::readNextIdentifier()
+	std::string Lexer::readNextIdentifier()
 	{
 		size_t length = 0;
 		uint32_t startingPosition = position;
@@ -213,13 +255,21 @@ namespace Delve { namespace Script {
 			} while (isIdentifierLetter(currentChar));
 		}
 
-		return std::string_view(input.data() + startingPosition, length);
+		return std::string(input.data() + startingPosition, length);
 	}
 
 	// This map holds all the language keywords
 	std::unordered_map<std::string, Token::Type> Lexer::keywords = { 
 		{"function", Token::Type::Function}, {"let", Token::Type::Let}, {"true", Token::Type::True}, {"false", Token::Type::False},
 		{"if", Token::Type::If}, {"else", Token::Type::Else}, {"return", Token::Type::Return}
+	};
+
+	std::unordered_map<Token::Type, std::string> Lexer::tokenLiterals = {
+		{ Token::Type::Equal, "==" },{ Token::Type::Assign, "=" },{ Token::Type::Semicolon, ";" },{ Token::Type::LParen, "(" },{ Token::Type::RParen, ")" },{ Token::Type::Comma, "," },
+		{ Token::Type::Plus, "+" },{ Token::Type::Minus, "-" },{ Token::Type::Multiply, "*" },
+		{ Token::Type::Divide, "/" },{ Token::Type::Negate, "!" },{ Token::Type::NotEqual, "!=" },
+		{ Token::Type::GreaterThan, ">" },{ Token::Type::LessThan, "<" },{ Token::Type::LBrace, "{" },
+		{ Token::Type::RBrace, "}" }
 	};
 
 	/*
@@ -256,7 +306,7 @@ namespace Delve { namespace Script {
 		}
 	}
 
-	std::string_view Lexer::readNextNumber() 
+	std::string Lexer::readNextNumber() 
 	{
 		size_t length = 0;
 		uint32_t startingPosition = position;
@@ -268,6 +318,6 @@ namespace Delve { namespace Script {
 			} while (isIdentifierLetter(currentChar));
 		}
 
-		return std::string_view(input.data() + startingPosition, length);
+		return std::string(input.data() + startingPosition, length);
 	}
 }}

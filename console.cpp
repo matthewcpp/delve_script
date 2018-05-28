@@ -14,7 +14,6 @@ namespace Delve { namespace Script {
 			std::getline(std::cin, input);
 
 			Lexer lexer(input);
-			lexer.tokenize();
 
 			const auto& tokens = lexer.tokens();
 

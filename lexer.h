@@ -2,34 +2,45 @@
 
 #include "token.h"
 #include <string>
-#include <string_view>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace Delve { namespace Script{
 
 	class Lexer {
 	public:
-		Lexer(const std::string& inputStr);
+		using TokenVector = std::vector<std::unique_ptr<Token>>;
 
 	public:
-		void tokenize();
-		inline const std::vector<std::unique_ptr<Token>>& tokens() const;
+		Lexer(const std::string& inputStr);
+		Lexer();
+
+	public:
+		void tokenize(const std::string& inputStr);
+		inline const TokenVector& tokens() const { return tokenVec; };
+
+		size_t tokenCount() const;
+		const Token* getToken(size_t index) const;
 
 	private:
+		void init();
 		void nextToken();
 
 		void readNextChar();
 		void skipWhitespace();
 		char peekNextChar() const;
 
-		std::string_view readNextIdentifier();
-		std::string_view readNextNumber();
+		std::string readNextIdentifier();
+		std::string readNextNumber();
 		
 		static bool isIdentifierFirstLetter(char ch);
 		static bool isIdentifierLetter(char ch);
 
+	private:
 		static std::unordered_map<std::string, Token::Type> keywords;
+		static std::unordered_map<Token::Type, std::string> tokenLiterals;
+
 		static Token::Type getIdentifierType(const std::string_view& identifier);
 		
 
@@ -42,11 +53,7 @@ namespace Delve { namespace Script{
 		char currentChar;
 
 		std::string input;
-		std::vector<std::unique_ptr<Token>> tokenVec;
+		TokenVector tokenVec;
 	};
-
-	inline const std::vector<std::unique_ptr<Token>>& Lexer::tokens() const {
-		return tokenVec;
-	}
 
 }}
