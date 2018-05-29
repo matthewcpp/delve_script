@@ -20,7 +20,6 @@ namespace Delve {
 				const Token* token;
 			};
 
-			typedef Node Statement;
 			typedef Node Expression;
 
 			struct Identifier : public Expression
@@ -39,6 +38,15 @@ namespace Delve {
 				PrefixExpression(const Token* t) : Expression(t) {}
 				std::unique_ptr<Expression> rightExpression;
 			};
+
+			struct InfixExpression : public Expression
+			{
+				InfixExpression(const Token* t) : Expression(t) {}
+				std::unique_ptr<Expression> left;
+				std::unique_ptr<Expression> right;
+			};
+
+			typedef Node Statement;
 
 			struct LetStatement : public Statement
 			{

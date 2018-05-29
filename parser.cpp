@@ -158,11 +158,11 @@ namespace Delve { namespace Script {
 		std::unique_ptr<Ast::ExpressionStatement> statement;
 
 		auto* expressionStartToken = currentToken;
-		auto expression = parseExpression(Precidence::Lowest);
+		auto expression = parseExpression(Precedence::Lowest);
 
 		if (expression) {
 			statement = std::make_unique<Ast::ExpressionStatement>(expressionStartToken);
-			statement->expression = std::move(expression);
+			statement->expression.reset(expression);
 		}
 		else {
 			return statement;
@@ -175,15 +175,25 @@ namespace Delve { namespace Script {
 		return statement;
 	}
 
-	std::unique_ptr<Ast::Expression> Parser::parseExpression(Precidence precedence) {
-		std::unique_ptr<Ast::Expression> leftExpression;
-
+	Ast::Expression* Parser::parseExpression(Precedence precedence) {
 		auto result = prefixParseFuncs.find(currentToken->type);
 		if (result == prefixParseFuncs.end()) {
-			return leftExpression;
+			return nullptr;
 		}
 
-		leftExpression.reset(result->second());
+		auto* leftExpression =  result->second();
+
+		while (peekToken->type != Token::Type::Semicolon && precedence < getTokenPrecedence(peekToken)) {
+			auto infixFuncResult = infixParsingFuncs.find(peekToken->type);
+
+			if (infixFuncResult == infixParsingFuncs.end()) {
+				return leftExpression;
+			}
+
+			nextToken();
+
+			leftExpression = infixFuncResult->second(leftExpression);
+		}
 
 		return leftExpression;
 	}
@@ -251,11 +261,45 @@ namespace Delve { namespace Script {
 
 		nextToken();
 
-		prefixExpression->rightExpression = parseExpression(Precidence::Prefix);
+		prefixExpression->rightExpression.reset(parseExpression(Precedence::Prefix));
 
 		return prefixExpression;
 	}
 
+	Ast::Expression* Parser::parseInfixExpression(Ast::Expression* leftExpression) {
+		auto* infixExpression = new Ast::InfixExpression{ currentToken };
+		infixExpression->left.reset(leftExpression);
+
+		Precedence currentPrecedence = getTokenPrecedence(currentToken);
+		nextToken();
+		infixExpression->right.reset(parseExpression(currentPrecedence));
+
+		return infixExpression;
+	}
+
+	/*
+	* Gets the precedence for a token type.  Note that if the precedence is not explicitly defined for a token, Precedence::Lowest will be returned.
+	* @param token the token for which to get precedence
+	* @returns the precedence for the supplied token
+	*/
+	Parser::Precedence Parser::getTokenPrecedence(const Token* token)
+	{
+		auto result = precedenceMap.find(token->type);
+
+		if (result == precedenceMap.end())
+		{
+			return Precedence::Lowest;
+		}
+		else {
+			return result->second;
+		}
+	}
+
+	/*
+	* Binds callbacks for expression parsing for each token type.  
+	* Prefix expressions are those which the operator appears before the expression, e.x -5.
+	* Infix expressions are those which the operator appears in between 2 expressions, e.x 5 + 5.
+	*/
 	void Parser::initParsingFuncs()
 	{
 		prefixParseFuncs[Token::Type::Identifier] = [this]() ->Ast::Expression* {
@@ -273,6 +317,32 @@ namespace Delve { namespace Script {
 		prefixParseFuncs[Token::Type::Minus] = [this]() ->Ast::Expression* {
 			return this->parsePrefixExpression();
 		};
+
+		auto parseInfix = [this](Ast::Expression* expression) -> Ast::Expression* {
+			return this->parseInfixExpression(expression);
+		};
+
+		for (auto& tokenType : infixTokenTypes) {
+			infixParsingFuncs[tokenType] = parseInfix;
+		}
 	}
+
+	// this structure holds all the tokens that need to be registers for infix expression parsing
+	std::vector<Token::Type> Parser::infixTokenTypes = { Token::Type::Plus, Token::Type::Minus,
+		Token::Type::Divide, Token::Type::Multiply, Token::Type::Equal, Token::Type::NotEqual,
+		Token::Type::LessThan, Token::Type::GreaterThan
+	};
+
+	// this structure maps token operator types to their parsing precedence
+	std::unordered_map<Token::Type, Parser::Precedence> Parser::precedenceMap = {
+		{ Token::Type::Equal, Parser::Precedence::Equals },
+		{ Token::Type::NotEqual, Parser::Precedence::Equals },
+		{ Token::Type::LessThan, Parser::Precedence::LessGreater },
+		{ Token::Type::GreaterThan, Parser::Precedence::LessGreater },
+		{ Token::Type::Plus, Parser::Precedence::Sum },
+		{ Token::Type::Minus, Parser::Precedence::Sum },
+		{ Token::Type::Divide, Parser::Precedence::Product },
+		{ Token::Type::Multiply, Parser::Precedence::Product },
+	};
 
 }}

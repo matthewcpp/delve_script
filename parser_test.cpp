@@ -93,9 +93,9 @@ TEST(Parser, ParseExpressionStatementIdentifier)
 	const auto* program = parser.getProgram();
 	const auto& errors = parser.getErrors();
 
-	EXPECT_EQ(program->statements[0]->token->type, Token::Type::Identifier);
-
 	ASSERT_EQ(program->statements.size(), 1);
+	EXPECT_EQ(program->statements[0]->token->type, Token::Type::Identifier);
+	
 	ASSERT_EQ(errors.size(), 0);
 }
 
@@ -152,6 +152,43 @@ TEST(Parser, ParsePrefixExpressionStatementBang)
 
 	ASSERT_EQ(prefixExpression->token->type, Token::Type::Negate);
 	ASSERT_EQ(prefixExpression->rightExpression->token->type, Token::Type::Identifier);
+}
+
+TEST(Parser, ParseBasicInfixExpressions)
+{
+	std::string code =
+		"5 + 5;"
+		"5 - 5;"
+		"5 * 5;"
+		"5 / 5;"
+		"5 > 5;"
+		"5 < 5;"
+		"5 == 5;"
+		"5 != 5;";
+
+	std::vector<Token::Type> infixOperatorTypes = {
+		Token::Type::Plus, Token::Type::Minus, Token::Type::Multiply, Token::Type::Divide,
+		Token::Type::GreaterThan, Token::Type::LessThan, Token::Type::Equal, Token::Type::NotEqual
+	};
+
+	Lexer lexer(code);
+	Parser parser(lexer.tokens());
+
+	const auto* program = parser.getProgram();
+	const auto& errors = parser.getErrors();
+
+	ASSERT_EQ(program->statements.size(), infixOperatorTypes.size());
+
+	for (size_t i = 0; i < infixOperatorTypes.size(); ++i) {
+		const auto* expressionStatement = dynamic_cast<const Ast::ExpressionStatement*>(program->statements[i].get());
+		ASSERT_NE(expressionStatement, nullptr);
+
+		const auto* infixExpression = dynamic_cast<const Ast::InfixExpression*>(expressionStatement->expression.get());
+		ASSERT_NE(infixExpression, nullptr);
+
+		ASSERT_EQ(infixExpression->token->type, infixOperatorTypes[i]);
+	}
+		
 }
 
 Token* createTokenForType(Token::Type type, const std::string& literal)

@@ -27,7 +27,7 @@ public:
 	inline const ErrorList& getErrors() const { return errors; }
 
 private:
-	enum class Precidence
+	enum class Precedence
 	{
 		Lowest = 0,
 		Equals,
@@ -37,6 +37,10 @@ private:
 		Prefix,
 		Call
 	};
+
+	static std::unordered_map<Token::Type, Precedence> precedenceMap;
+
+	static Precedence getTokenPrecedence(const Token* token);
 
 private:
 	void init();
@@ -49,7 +53,7 @@ private:
 	std::unique_ptr<Ast::ExpressionStatement> parseExpressionStatement();
 
 	std::unique_ptr<Ast::Identifier> parseIdentifer();
-	std::unique_ptr<Ast::Expression> parseExpression(Precidence precedence);
+	Ast::Expression* parseExpression(Precedence precedence);
 	
 
 	void parseError(const std::string& message);
@@ -61,6 +65,8 @@ private:
 
 	std::unordered_map<Token::Type, PrefixParsingFunc> prefixParseFuncs;
 	std::unordered_map<Token::Type, InfixParsingFunc> infixParsingFuncs;
+	
+	static std::vector<Token::Type> infixTokenTypes;
 
 	void initParsingFuncs();
 
@@ -68,6 +74,7 @@ private:
 	Ast::Expression* parseIdentifierExpression();
 	Ast::Expression* parseIntegerLiteralExpression();
 	Ast::Expression* parsePrefixExpression();
+	Ast::Expression* parseInfixExpression(Ast::Expression* leftExpression);
 
 private:
 	const Token::Vector* tokens;
