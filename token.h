@@ -1,7 +1,9 @@
 #pragma once
 
 #include <string>
-#include <stdint.h>
+#include <memory>
+#include <cstdint>
+#include <vector>
 
 namespace Delve { namespace Script {
 struct Token
@@ -58,6 +60,8 @@ struct Token
 
 	Token():type(Type::Illegal), lineNum(0), colNum(0) {}
 	static std::string getTokenName(const Type& tokenType);
+
+	using Vector = std::vector<std::unique_ptr<Token>>;
 };
 
 }}

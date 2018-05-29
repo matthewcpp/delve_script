@@ -143,7 +143,7 @@ TEST(Lexer, SimpleFunctionStatement)
 }
 
 /*
-* Tests that the lexer can handle token that are ocmprise dof two characters
+* Tests that the lexer can handle token that are comprised of two characters
 */
 TEST(Lexer, TwoCharacterTokens)
 {
@@ -160,6 +160,22 @@ TEST(Lexer, TwoCharacterTokens)
 	Delve::Script::Lexer lexer(input);
 
 	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
+}
+
+/*
+* Tests the Lexer is reset when clear is called
+*/
+TEST(Lexer, Clear)
+{
+	std::string input = "Let x = 7;";
+	Lexer lexer(input);
+
+	auto& tokens = lexer.tokens();
+	EXPECT_EQ(tokens.size(), 6);
+
+	lexer.clear();
+
+	EXPECT_EQ(tokens.size(), 0);
 }
 
 void compareTokenTypeAndValues(const Lexer& lexer, const std::vector<Delve::Script::Token::Type>& expectedTokens, const std::vector<std::string>& expectedLiterals)

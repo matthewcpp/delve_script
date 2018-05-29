@@ -9,19 +9,16 @@
 namespace Delve { namespace Script{
 
 	class Lexer {
-	public:
-		using TokenVector = std::vector<std::unique_ptr<Token>>;
 
 	public:
-		Lexer(const std::string& inputStr);
 		Lexer();
-
+		Lexer(const std::string& inputStr);
+		
 	public:
 		void tokenize(const std::string& inputStr);
-		inline const TokenVector& tokens() const { return tokenVec; };
+		inline const Token::Vector& tokens() const { return tokens_; };
 
-		size_t tokenCount() const;
-		const Token* getToken(size_t index) const;
+		void clear();
 
 	private:
 		void init();
@@ -45,15 +42,15 @@ namespace Delve { namespace Script{
 		
 
 	private:
-		uint16_t currentLine;
-		uint16_t currentCol;
+		uint16_t currentLine_;
+		uint16_t currentCol_;
 
-		uint32_t position;
-		uint32_t readPosition;
-		char currentChar;
+		uint32_t position_;
+		uint32_t readPosition_;
+		char currentChar_;
 
-		std::string input;
-		TokenVector tokenVec;
+		const std::string* input_;
+		Token::Vector tokens_;
 	};
 
 }}

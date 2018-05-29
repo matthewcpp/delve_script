@@ -3,49 +3,37 @@
 #include <cctype>
 
 namespace Delve { namespace Script {
-	Lexer::Lexer(const std::string& inputStr)
-		:currentLine(1), currentCol(0), currentChar(EOF), position(0), readPosition(0)
-	{
-		init();
-		tokenize(inputStr);
-	}
-
 	Lexer::Lexer()
 	{
 		init();
 	}
 
+	Lexer::Lexer(const std::string& inputStr)
+	{
+		init();
+		tokenize(inputStr);
+	}
+
+	/*
+	* Initializes Lexer members to their default values.
+	*/
 	void Lexer::init()
 	{
-		currentLine = 0;
-		currentCol = 0;
-		currentChar = EOF;
-		position = 0;
-		readPosition = 0;
+		input_ = nullptr;
+		currentLine_ = 1;
+		currentCol_ = 0;
+		currentChar_ = EOF;
+		position_ = 0;
+		readPosition_ = 0;
 	}
 
 	/**
-	* Gets the number of tokens in the internal token list
-	* @retuns the number of tokens in the internal list
+	* Resets the Lexer to its initial state.
 	*/
-	size_t Lexer::tokenCount() const
+	void Lexer::clear()
 	{
-		return tokenVec.size();
-	}
-
-	/**
-	* Gets a token at a given position from the internal token list
-	* @param index index of token to get
-	* @returns token at the given index or nullptr if index is out of range
-	*/
-	const Token* Lexer::getToken(size_t index) const
-	{
-		if (index < tokenVec.size()) {
-			return tokenVec[index].get();
-		}
-		else {
-			return nullptr;
-		}
+		init();
+		tokens_.clear();
 	}
 
 	/*
@@ -55,14 +43,14 @@ namespace Delve { namespace Script {
 	*/
 	void Lexer::readNextChar()
 	{
-		if (readPosition < input.length()) {
-			currentChar = input[readPosition];
-			position = readPosition;
-			readPosition += 1;
-			currentCol += 1;
+		if (readPosition_ < input_->length()) {
+			currentChar_ = input_->at(readPosition_);
+			position_ = readPosition_;
+			readPosition_ += 1;
+			currentCol_ += 1;
 		}
 		else {
-			currentChar = 0;
+			currentChar_ = 0;
 		}
 	}
 
@@ -72,8 +60,8 @@ namespace Delve { namespace Script {
 	*/
 	char Lexer::peekNextChar() const 
 	{
-		if (readPosition < input.length()) {
-			return input[readPosition];
+		if (readPosition_ < input_->length()) {
+			return input_->at(readPosition_);
 		}
 		else {
 			return 0;
@@ -83,17 +71,17 @@ namespace Delve { namespace Script {
 
 	/*
 	* Parses the next token from the input stream.  Returns a token with Token::Type::Eof when the end of the input is reached.
-	* After Eof is reached, this function will continue to return Eof tokens on sucessive calls.
+	* After Eof is reached, this function will continue to return Eof tokens on successive calls.
 	*/
 	void Lexer::nextToken()
 	{
 		skipWhitespace();
 
 		auto token = std::make_unique<Token>();
-		token->lineNum = currentLine;
-		token->colNum = currentCol;
+		token->lineNum = currentLine_;
+		token->colNum = currentCol_;
 
-		switch (currentChar)
+		switch (currentChar_)
 		{
 		case '=': {
 			char nextChar = peekNextChar();
@@ -173,44 +161,48 @@ namespace Delve { namespace Script {
 			token->type = Token::Type::Eof;
 			break;
 		default: {
-			if (isIdentifierFirstLetter(currentChar)) {
+			if (isIdentifierFirstLetter(currentChar_)) {
 				token->literal = readNextIdentifier();
 				token->type = getIdentifierType(token->literal);
-				tokenVec.push_back(std::move(token));
+				tokens_.push_back(std::move(token));
 				return;
 			}
-			else if (std::isdigit(currentChar)) {
+			else if (std::isdigit(currentChar_)) {
 				token->literal = readNextNumber();
 				token->type = Token::Type::Integer;
-				tokenVec.push_back(std::move(token));
+				tokens_.push_back(std::move(token));
 				return;
 			}
 			else {
 				//in this case we do not have any idea what this token is.
 				token->type = Token::Type::Illegal;
-				tokenVec.push_back(std::move(token));
+				tokens_.push_back(std::move(token));
 				return;
 			}
 		}
 		}
 
-		tokenVec.push_back(std::move(token));
+		tokens_.push_back(std::move(token));
 		readNextChar();
 	}
 
 	/**
-	* turns the input text into a token vector.  Stops parsing when an illegal token is encountered or the file is complete.
+	* Turns the input text into a token vector.  Stops parsing when an illegal token is encountered or the file is complete.
+	* @param inputStr the input text to tokenize
 	*/
 	void Lexer::tokenize(const std::string& inputStr)
 	{
-		currentLine = 1;
-		input = inputStr;
+		if (input_) {
+			clear();
+		}
+
+		input_ = &inputStr;
 		readNextChar();
 
 		while (true) {
 			nextToken();
 
-			auto& token = tokenVec.back();
+			auto& token = tokens_.back();
 			
 			if (token->type == Token::Type::Eof || token->type == Token::Type::Illegal) {
 				break;
@@ -219,7 +211,7 @@ namespace Delve { namespace Script {
 	}
 
 	/*
-	* Gets whether a character is valid as the first letter in an identifer.
+	* Gets whether a character is valid as the first letter in an identifier.
 	* @param ch the character to test
 	* @returns value indicating this character is valid as first letter in an identifier
 	*/
@@ -229,7 +221,7 @@ namespace Delve { namespace Script {
 	}
 
 	/*
-	* Gets whether a character is value as a subsequent character in an identifer
+	* Gets whether a character is value as a subsequent character in an identifier
 	* @param ch the character to test
 	* @returns value indicating this character is valid as subsequent letter in an identifier
 	*/
@@ -246,16 +238,16 @@ namespace Delve { namespace Script {
 	std::string Lexer::readNextIdentifier()
 	{
 		size_t length = 0;
-		uint32_t startingPosition = position;
+		uint32_t startingPosition = position_;
 
-		if (isIdentifierFirstLetter(currentChar)) {
+		if (isIdentifierFirstLetter(currentChar_)) {
 			do {
 				length += 1;
 				readNextChar();
-			} while (isIdentifierLetter(currentChar));
+			} while (isIdentifierLetter(currentChar_));
 		}
 
-		return std::string(input.data() + startingPosition, length);
+		return std::string(input_->data() + startingPosition, length);
 	}
 
 	// This map holds all the language keywords
@@ -264,6 +256,7 @@ namespace Delve { namespace Script {
 		{"if", Token::Type::If}, {"else", Token::Type::Else}, {"return", Token::Type::Return}
 	};
 
+	// This map holds the string literals for each token type
 	std::unordered_map<Token::Type, std::string> Lexer::tokenLiterals = {
 		{ Token::Type::Equal, "==" },{ Token::Type::Assign, "=" },{ Token::Type::Semicolon, ";" },{ Token::Type::LParen, "(" },{ Token::Type::RParen, ")" },{ Token::Type::Comma, "," },
 		{ Token::Type::Plus, "+" },{ Token::Type::Minus, "-" },{ Token::Type::Multiply, "*" },
@@ -273,8 +266,8 @@ namespace Delve { namespace Script {
 	};
 
 	/*
-	* Checks to see if an identifer is a language keyword.  If so returns the appropriate token type.  Otherwise returns identifier.
-	* @param identifer name to test if a language keyword
+	* Checks to see if an identifier is a language keyword.  If so returns the appropriate token type.  Otherwise returns identifier.
+	* @param identifier name to test if a language keyword
 	* @returns Token::Type representing the keyword or Token::Type::Identifier if not a language keyword
 	*/
 	Token::Type Lexer::getIdentifierType(const std::string_view& identifier)
@@ -296,28 +289,33 @@ namespace Delve { namespace Script {
 	*/
 	void Lexer::skipWhitespace() 
 	{
-		while (std::isspace(currentChar)) {
-			if (currentChar == 0x0a) {
-				currentLine += 1;
-				currentCol = 0;
+		while (std::isspace(currentChar_)) {
+			if (currentChar_ == 0x0a) {
+				currentLine_ += 1;
+				currentCol_ = 0;
 			}
 
 			readNextChar();
 		}
 	}
 
+	/*
+	* Reads from the input until a non number identifier is found.   The input position will be set to the character after
+	* the final digit of the number when this method returns.
+	* @return string of the next number in the input string
+	*/
 	std::string Lexer::readNextNumber() 
 	{
 		size_t length = 0;
-		uint32_t startingPosition = position;
+		uint32_t startingPosition = position_;
 
-		if (std::isdigit(currentChar)) {
+		if (std::isdigit(currentChar_)) {
 			do {
 				length += 1;
 				readNextChar();
-			} while (isIdentifierLetter(currentChar));
+			} while (isIdentifierLetter(currentChar_));
 		}
 
-		return std::string(input.data() + startingPosition, length);
+		return std::string(input_->data() + startingPosition, length);
 	}
 }}
