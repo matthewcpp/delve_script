@@ -31,6 +31,7 @@ set_property(TARGET delvescript_console PROPERTY CXX_STANDARD 17)
 set_property(TARGET delvescript_console PROPERTY CXX_STANDARD_REQUIRED ON)
 
 set (test_sources
+	ast_test.cpp
 	token_test.cpp
 	lexer_test.cpp
 	parser_test.cpp

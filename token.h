@@ -58,7 +58,9 @@ struct Token
 	uint16_t colNum;
 	std::string literal;
 
-	Token():type(Type::Illegal), lineNum(0), colNum(0) {}
+	Token() : type(Type::Illegal), lineNum(0), colNum(0) {}
+	Token(Type t, const std::string& l) : type(t), literal(l), lineNum(0), colNum(0) {}
+
 	static std::string getTokenName(const Type& tokenType);
 
 	using Vector = std::vector<std::unique_ptr<Token>>;

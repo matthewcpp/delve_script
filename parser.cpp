@@ -240,7 +240,7 @@ namespace Delve { namespace Script {
 	Ast::Expression* Parser::parseIdentifierExpression()
 	{
 		assert(currentToken->type == Token::Type::Identifier);
-		return new Ast::Expression{ this->currentToken };
+		return new Ast::Identifier{ this->currentToken };
 	}
 
 	Ast::Expression* Parser::parseIntegerLiteralExpression()
