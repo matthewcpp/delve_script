@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace Delve { namespace Script{
+namespace Delve::Script{
 
 	class Lexer {
 
@@ -53,4 +53,4 @@ namespace Delve { namespace Script{
 		Token::Vector tokens_;
 	};
 
-}}
+}

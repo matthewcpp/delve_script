@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <sstream>
 
-namespace Delve { namespace Script { namespace Ast {
+namespace Delve::Script::Ast {
 
 struct Node
 {
@@ -125,4 +125,4 @@ struct Program
 
 };
 
-}}}
+}

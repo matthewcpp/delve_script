@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <functional>
 
-namespace Delve { namespace Script {
+namespace Delve::Script {
 
 class Parser
 {
@@ -88,4 +88,4 @@ private:
 	uint32_t currentTokenReadPos;
 };
 
-}}
+}

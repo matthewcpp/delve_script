@@ -3,7 +3,7 @@
 #include <cassert>
 #include <sstream>
 
-namespace Delve { namespace Script {
+namespace Delve::Script {
 	Parser::Parser()
 	{
 		init();
@@ -345,4 +345,4 @@ namespace Delve { namespace Script {
 		{ Token::Type::Multiply, Parser::Precedence::Product },
 	};
 
-}}
+}

@@ -2,11 +2,11 @@
 
 #include "lexer.h"
 
-namespace Delve { namespace Script {
+namespace Delve::Script {
 
 class Console {
 public:
 	void runInteractive();
 };
 
-}}
+}

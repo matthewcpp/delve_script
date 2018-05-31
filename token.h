@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace Delve { namespace Script {
+namespace Delve::Script {
 struct Token
 {
 	enum class Type
@@ -66,4 +66,4 @@ struct Token
 	using Vector = std::vector<std::unique_ptr<Token>>;
 };
 
-}}
+}

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-namespace Delve { namespace Script {
+namespace Delve::Script {
 
 	void Console::runInteractive() {
 		std::cout << "Delve Script Interactive Terminal." << std::endl;
@@ -32,4 +32,4 @@ namespace Delve { namespace Script {
 			}
 		}
 	}
-}}
+}

@@ -2,7 +2,7 @@
 
 #include <cctype>
 
-namespace Delve { namespace Script {
+namespace Delve::Script {
 	Lexer::Lexer()
 	{
 		init();
@@ -318,4 +318,4 @@ namespace Delve { namespace Script {
 
 		return std::string(input_->data() + startingPosition, length);
 	}
-}}
+}

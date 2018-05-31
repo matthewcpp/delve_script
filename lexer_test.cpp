@@ -104,7 +104,10 @@ TEST(Lexer, Keywords)
 */
 TEST(Lexer, SimpleLetStatement)
 {
-	std::string input = "let five = 10;";
+	std::vector<std::string> inputs = {
+		"let five = 10;",
+		"let\nfive\t=10  ;"
+	};
 
 	std::vector<Token::Type> expectedTokens = {
 		Token::Type::Let, Token::Type::Identifier, Token::Type::Assign,
@@ -115,9 +118,12 @@ TEST(Lexer, SimpleLetStatement)
 		"let", "five", "=", "10", ";", ""
 	};
 
-	Delve::Script::Lexer lexer(input);
+	Delve::Script::Lexer lexer;
 
-	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
+	for (auto& input : inputs) {
+		lexer.tokenize(input);
+		compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
+	}
 }
 
 /*
@@ -125,7 +131,10 @@ TEST(Lexer, SimpleLetStatement)
 */
 TEST(Lexer, SimpleFunctionStatement)
 {
-	std::string input = "function(x, y) {\r\nreturn x + y; \r\n}";
+	std::vector<std::string> inputs = {
+		"function(x, y) {\r\nreturn x + y; \r\n}",
+		"function(x,y){return x+y;}"
+	};
 
 	std::vector<Token::Type> expectedTokens = {
 		Token::Type::Function, Token::Type::LParen, Token::Type::Identifier, Token::Type::Comma,
@@ -137,9 +146,12 @@ TEST(Lexer, SimpleFunctionStatement)
 		"function", "(", "x", ",", "y", ")", "{", "return", "x", "+", "y", ";", "}", ""
 	};
 
-	Delve::Script::Lexer lexer(input);
+	Delve::Script::Lexer lexer;
 
-	compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
+	for (auto& input : inputs) {
+		lexer.tokenize(input);
+		compareTokenTypeAndValues(lexer, expectedTokens, expectedLiterals);
+	}
 }
 
 /*

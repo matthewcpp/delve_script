@@ -1,6 +1,6 @@
 #include "token.h"
 
-namespace Delve { namespace Script {
+namespace Delve::Script {
 
 /**
 * Returns a String representation of a TokenType enumeration.
@@ -77,4 +77,4 @@ std::string Token::getTokenName(const Type& tokenType) {
 	}
 }
 
-}}
+}
