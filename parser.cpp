@@ -127,12 +127,7 @@ namespace Delve::Script {
 
 		nextToken();
 
-		// TODO: skip expression till we encounter a semicolon
-		while (currentToken->type != Token::Type::Semicolon) {
-			nextToken();
-		}
-		//statement->expression = parseExpression();
-
+		statement->expression.reset(parseExpression(Precedence::Lowest));
 	
 		return statement;
 	}
@@ -144,11 +139,7 @@ namespace Delve::Script {
 
 		nextToken();
 
-		// TODO: skip expression till we encounter a semicolon
-		while (currentToken->type != Token::Type::Semicolon) {
-			nextToken();
-		}
-		//statement->expression = parseExpression();
+		statement->expression.reset(parseExpression(Precedence::Lowest));
 
 		return statement;
 	}

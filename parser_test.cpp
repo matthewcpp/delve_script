@@ -1,14 +1,15 @@
 #include "parser.h"
 #include "lexer.h"
 
+#include <vector>
+#include <string>
+
 #include <gtest/gtest.h>
 
 using namespace Delve::Script;
 
-/*
-* Convenient way to quickly make a token object. 
-*/
 Token* createTokenForType(Token::Type type, const std::string& literal = "");
+void compareStatementsToExpectedOutput(const std::vector<std::string>& statements, const std::vector<std::string>& expectedOutput);
 
 /*
 * Tests that an empty token set produces a null program with no errors.
@@ -191,6 +192,47 @@ TEST(Parser, ParseBasicInfixExpressions)
 		
 }
 
+TEST(Parser, BasicStatementsWithExpressions)
+{
+	std::vector<std::string> statements = {
+		"let x = y + z;",
+		"return 5-my_var;",
+		"my_var2 * 17;"
+	};
+
+	std::vector<std::string> expectedOutput = {
+		"let x = (y + z);",
+		"return (5 - my_var);",
+		"(my_var2 * 17);"
+	};
+
+	compareStatementsToExpectedOutput(statements, expectedOutput);
+}
+
+TEST(Parser, Precedence)
+{
+	std::vector<std::string> statements = {
+		"x + y + z;",
+		"x - y + z;",
+		"x + y * z;",
+		"x / y - z;",
+		"x * y * z + w;",
+		"x - y * z / w;"
+	};
+
+	std::vector<std::string> expectedOutput = {
+		"((x + y) + z);",
+		"((x - y) + z);",
+		"(x + (y * z));",
+		"((x / y) - z);",
+		"(((x * y) * z) + w);",
+		"(x - ((y * z) / w));"
+	};
+
+	compareStatementsToExpectedOutput(statements, expectedOutput);
+}
+
+
 Token* createTokenForType(Token::Type type, const std::string& literal)
 {
 	Token* token = new Token();
@@ -198,5 +240,26 @@ Token* createTokenForType(Token::Type type, const std::string& literal)
 	token->literal = literal;
 
 	return token;
+}
+
+void compareStatementsToExpectedOutput(const std::vector<std::string>& statements, const std::vector<std::string>& expectedOutput)
+{
+	ASSERT_EQ(statements.size(), expectedOutput.size());
+
+	Lexer lexer;
+	Parser parser;
+
+	for (size_t i = 0; i < statements.size(); ++i) {
+		lexer.tokenize(statements[i]);
+		parser.parse(lexer.tokens());
+
+		ASSERT_EQ(parser.getErrors().size(), 0);
+
+		auto program = parser.getProgram();
+		ASSERT_EQ(program->statements.size(), 1);
+
+		auto statement = program->statements[0].get();
+		ASSERT_EQ(expectedOutput[i], statement->toString());
+	}
 }
 
