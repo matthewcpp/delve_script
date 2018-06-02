@@ -276,6 +276,24 @@ namespace Delve::Script {
 		return infixExpression;
 	}
 
+	Ast::Expression* Parser::parseGroupedExpression()
+	{
+		assert(currentToken->type == Token::Type::LParen);
+		
+		nextToken();
+		
+		auto* expression = parseExpression(Precedence::Lowest);
+
+		if (peekToken->type != Token::Type::RParen) {
+			expectedTypeError(Token::Type::RParen, peekToken);
+			delete expression;
+			return nullptr;
+		}
+		else {
+			return expression;
+		}
+	}
+
 	/*
 	* Gets the precedence for a token type.  Note that if the precedence is not explicitly defined for a token, Precedence::Lowest will be returned.
 	* @param token the token for which to get precedence
@@ -323,6 +341,10 @@ namespace Delve::Script {
 
 		prefixParseFuncs[Token::Type::Minus] = [this]() ->Ast::Expression* {
 			return this->parsePrefixExpression();
+		};
+
+		prefixParseFuncs[Token::Type::LParen] = [this]() ->Ast::Expression* {
+			return this->parseGroupedExpression();
 		};
 
 		auto parseInfix = [this](Ast::Expression* expression) -> Ast::Expression* {

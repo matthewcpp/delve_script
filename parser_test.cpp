@@ -236,6 +236,21 @@ TEST(Parser, Precedence)
 	compareStatementsToExpectedOutput(statements, expectedOutput);
 }
 
+TEST(Parser, GroupedExpression)
+{
+	std::vector<std::string> statements = {
+		"(x == true)",
+		"x * (y + z);",
+	};
+
+	std::vector<std::string> expectedOutput = {
+		"(x == true)",
+		"(x * (y + z));",
+	};
+
+	compareStatementsToExpectedOutput(statements, expectedOutput);
+}
+
 
 Token* createTokenForType(Token::Type type, const std::string& literal)
 {
