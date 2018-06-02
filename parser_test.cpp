@@ -239,13 +239,19 @@ TEST(Parser, Precedence)
 TEST(Parser, GroupedExpression)
 {
 	std::vector<std::string> statements = {
-		"(x == true)",
+		"(x == true);",
 		"x * (y + z);",
+		"(3 + x) * (y - 4);",
+		"let w=(x + y * z) - (3 * w) + 7;",
+		"return((my_var * (7 + z)) / 3);"
 	};
 
 	std::vector<std::string> expectedOutput = {
-		"(x == true)",
+		"(x == true);",
 		"(x * (y + z));",
+		"((3 + x) * (y - 4));",
+		"let w = (((x + (y * z)) - (3 * w)) + 7);",
+		"return ((my_var * (7 + z)) / 3);"
 	};
 
 	compareStatementsToExpectedOutput(statements, expectedOutput);

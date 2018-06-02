@@ -290,6 +290,8 @@ namespace Delve::Script {
 			return nullptr;
 		}
 		else {
+			// Here we ensure that when we are done parsing this infix token the current token is set to the Rparen of this statement.
+			nextToken();
 			return expression;
 		}
 	}
