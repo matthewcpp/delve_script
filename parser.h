@@ -73,6 +73,7 @@ private:
 private:
 	Ast::Expression* parseIdentifierExpression();
 	Ast::Expression* parseIntegerLiteralExpression();
+	Ast::Expression* parseBooleanLiteralExpression();
 	Ast::Expression* parsePrefixExpression();
 	Ast::Expression* parseInfixExpression(Ast::Expression* leftExpression);
 

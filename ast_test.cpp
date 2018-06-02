@@ -50,6 +50,16 @@ TEST(Ast, InfixExpressionToString)
 	ASSERT_EQ(infixExpression.toString(), expectedStr);
 }
 
+TEST(Ast, BoolenLiteralExpressionToString)
+{
+	Token boolean(Token::Type::True, "true");
+	Ast::BooleanLiteral booleanLiteral(&boolean);
+	EXPECT_EQ(booleanLiteral.toString(), "true");
+
+	boolean.type = Token::Type::False;
+	EXPECT_EQ(booleanLiteral.toString(), "false");
+}
+
 TEST(Ast, LetStatementToString)
 {
 	std::string expectedStr = "let x = 5;";

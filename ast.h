@@ -43,6 +43,16 @@ struct IntegerLiteral : public Expression
 	}
 };
 
+struct BooleanLiteral : public Expression
+{
+	BooleanLiteral(const Token* t) : Expression(t) {}
+
+	virtual std::string toString() const override
+	{
+		return token->type == Token::Type::True ? "true" : "false";
+	}
+};
+
 struct PrefixExpression : public Expression
 {
 	PrefixExpression(const Token* t) : Expression(t) {}

@@ -243,6 +243,14 @@ namespace Delve::Script {
 		return integerLiteral;
 	}
 
+	Ast::Expression* Parser::parseBooleanLiteralExpression()
+	{
+		assert(currentToken->type == Token::Type::True || currentToken->type == Token::Type::False);
+		auto* booleanLiteral = new Ast::BooleanLiteral{ currentToken };
+
+		return booleanLiteral;
+	}
+
 	Ast::Expression* Parser::parsePrefixExpression()
 	{
 		//TODO: better handling of case where right expression fails to parse?
@@ -299,6 +307,14 @@ namespace Delve::Script {
 
 		prefixParseFuncs[Token::Type::Integer] = [this]() ->Ast::Expression* {
 			return this->parseIntegerLiteralExpression();
+		};
+
+		prefixParseFuncs[Token::Type::True] = [this]() ->Ast::Expression* {
+			return this->parseBooleanLiteralExpression();
+		};
+
+		prefixParseFuncs[Token::Type::False] = [this]() ->Ast::Expression* {
+			return this->parseBooleanLiteralExpression();
 		};
 
 		prefixParseFuncs[Token::Type::Negate] = [this]() ->Ast::Expression* {

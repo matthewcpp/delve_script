@@ -196,13 +196,17 @@ TEST(Parser, BasicStatementsWithExpressions)
 {
 	std::vector<std::string> statements = {
 		"let x = y + z;",
+		"let y = true;",
 		"return 5-my_var;",
+		"return false;",
 		"my_var2 * 17;"
 	};
 
 	std::vector<std::string> expectedOutput = {
 		"let x = (y + z);",
+		"let y = true;",
 		"return (5 - my_var);",
+		"return false;",
 		"(my_var2 * 17);"
 	};
 
