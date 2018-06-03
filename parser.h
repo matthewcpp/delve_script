@@ -52,9 +52,12 @@ private:
 	std::unique_ptr<Ast::ReturnStatement> parseReturnStatement();
 	std::unique_ptr<Ast::ExpressionStatement> parseExpressionStatement();
 
+	std::unique_ptr<Ast::BlockStatement> parseBlockStatement();
+
 	std::unique_ptr<Ast::Identifier> parseIdentifer();
 	Ast::Expression* parseExpression(Precedence precedence);
 	
+	void advanceUntil(Token::Type tokenType);
 
 	void parseError(const std::string& message);
 	void expectedTypeError(Token::Type expectedType, const Token* actualToken);

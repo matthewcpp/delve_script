@@ -57,19 +57,31 @@ namespace Delve::Script {
 			if (statement) {
 				program->statements.push_back(std::move(statement));
 			}
-			else
-			{
+			else {
 				// if there was error parsing the statement, we will eat all the tokens that
 				// remain from the error location to the end of that statement.
-				while (currentToken->type != Token::Type::Semicolon) {
-					nextToken();
-				}
+				advanceUntil(Token::Type::Semicolon);
 			}
 
 			nextToken();
 		}
 	}
 
+	void Parser::advanceUntil(Token::Type tokenType)
+	{
+		while (currentToken->type != tokenType) {
+			nextToken();
+
+			if (currentToken->type == Token::Type::Eof) {
+				break;
+			}
+		}
+	}
+
+	/*
+	* Parses the next full statement from the token stream.
+	* Postcondition: if a statement was parsed successfully, the current token will be set to the trailing semicolon of that statement.
+	*/
 	std::unique_ptr<Ast::Statement> Parser::parseStatement()
 	{
 		std::unique_ptr<Ast::Statement> statement;
@@ -83,6 +95,10 @@ namespace Delve::Script {
 			statement = parseReturnStatement();
 			break;
 
+		case Token::Type::LBrace:
+			statement = parseBlockStatement();
+			break;
+
 		default:
 			statement = parseExpressionStatement();
 		}
@@ -91,7 +107,7 @@ namespace Delve::Script {
 	}
 
 	/*
-	* Parses a let statement in the form of `let <identifier> = <statement>;
+	* Parses a let statement in the form of let <identifier> = <statement>;
 	* Precondition: current token has token type of Let.
 	* @returns unique pointer containing an AST hierarchy for this statement.  Pointer will be initialized to nullptr if there is a parsing error.
 	*/
@@ -128,6 +144,9 @@ namespace Delve::Script {
 		nextToken();
 
 		statement->expression.reset(parseExpression(Precedence::Lowest));
+
+		assert(peekToken->type == Token::Type::Semicolon);
+		nextToken();
 	
 		return statement;
 	}
@@ -140,6 +159,9 @@ namespace Delve::Script {
 		nextToken();
 
 		statement->expression.reset(parseExpression(Precedence::Lowest));
+
+		assert(peekToken->type == Token::Type::Semicolon);
+		nextToken();
 
 		return statement;
 	}
@@ -159,13 +181,36 @@ namespace Delve::Script {
 			return statement;
 		}
 
-		if (peekToken->type == Token::Type::Semicolon) {
-			nextToken();
-		}
+		assert(peekToken->type == Token::Type::Semicolon);
+		nextToken();
 
 		return statement;
 	}
 
+	std::unique_ptr<Ast::BlockStatement> Parser::parseBlockStatement()
+	{
+		assert(currentToken->type == Token::Type::LBrace);
+
+		auto blockStatement = std::make_unique<Ast::BlockStatement>(currentToken);
+
+		nextToken();
+
+		while (currentToken->type != Token::Type::RBrace && currentToken->type != Token::Type::Eof) {
+			auto statement = parseStatement();
+			if (statement) {
+				blockStatement->statements.emplace_back(std::move(statement));
+			}
+
+			nextToken();
+		}
+
+		return blockStatement;
+	}
+
+	/*
+	* Parses the next expression from the input token stream.
+	* Postcondition: the current token will be set to the final token consumed by parsing the appropriate expression.  This will most likely be a ";" or a "}"
+	*/
 	Ast::Expression* Parser::parseExpression(Precedence precedence) {
 		auto result = prefixParseFuncs.find(currentToken->type);
 		if (result == prefixParseFuncs.end()) {

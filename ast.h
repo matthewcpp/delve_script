@@ -116,6 +116,30 @@ struct ExpressionStatement : public Statement
 		return expression->toString() + ';';
 	}
 };
+namespace Internal {
+inline std::string statementVectorToString(const std::vector<std::unique_ptr<Statement>>& statements)
+{
+	std::ostringstream str;
+
+	for (auto& statement : statements) {
+		str << statement.get()->toString() << '\n';
+	}
+
+	return str.str();
+}
+}
+
+struct BlockStatement : public Statement
+{
+	BlockStatement(const Token* t) : Statement(t) {}
+	std::vector<std::unique_ptr<Statement>> statements;
+
+	std::string toString() const
+	{
+		return Internal::statementVectorToString(statements);
+	}
+
+};
 
 struct Program
 {
@@ -123,16 +147,8 @@ struct Program
 
 	std::string toString() const
 	{
-		std::ostringstream str;
-
-		for (auto& statement : statements) {
-			str << statement.get()->toString() << '\n';
-		}
-
-		return str.str();
+		return Internal::statementVectorToString(statements);
 	}
-	
-
 };
 
 }

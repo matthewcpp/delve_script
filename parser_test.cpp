@@ -155,6 +155,36 @@ TEST(Parser, ParsePrefixExpressionStatementBang)
 	ASSERT_EQ(prefixExpression->rightExpression->token->type, Token::Type::Identifier);
 }
 
+TEST(Parser, ParseBlockStatement)
+{
+	std::vector<std::string> inputs = {
+		"{let i = 0;}",
+		"{let x=1;x+7;let y=x+4;}",
+		"{let x=2; {let i=7;}}"
+	};
+
+	std::vector<size_t> expectedStatementCounts = {
+		1, 3, 2
+	};
+
+	ASSERT_EQ(inputs.size(), expectedStatementCounts.size());
+
+	Lexer lexer;
+	Parser parser;
+
+	for (size_t i = 0; i < inputs.size(); ++i) {
+		lexer.tokenize(inputs[i]);
+		parser.parse(lexer.tokens());
+
+		const auto* program = parser.getProgram();
+		const auto& errors = parser.getErrors();
+
+		ASSERT_EQ(errors.size(), 0);
+		const auto * blockStatement = static_cast<Ast::BlockStatement*>(program->statements[0].get());
+		ASSERT_EQ(blockStatement->statements.size(), expectedStatementCounts[i]);
+	}
+}
+
 TEST(Parser, ParseBasicInfixExpressions)
 {
 	std::string code =
