@@ -80,7 +80,7 @@ namespace Delve::Script {
 
 	/*
 	* Parses the next full statement from the token stream.
-	* Postcondition: if a statement was parsed successfully, the current token will be set to the trailing semicolon of that statement.
+	* Postcondition: if a statement was parsed successfully, the current token will be set to the trailing semicolon or Rbrace of that statement.
 	*/
 	std::unique_ptr<Ast::Statement> Parser::parseStatement()
 	{
@@ -97,6 +97,10 @@ namespace Delve::Script {
 
 		case Token::Type::LBrace:
 			statement = parseBlockStatement();
+			break;
+
+		case Token::Type::If:
+			statement = parseIfStatement();
 			break;
 
 		default:
@@ -181,7 +185,6 @@ namespace Delve::Script {
 			return statement;
 		}
 
-		assert(peekToken->type == Token::Type::Semicolon);
 		nextToken();
 
 		return statement;
@@ -241,22 +244,24 @@ namespace Delve::Script {
 	}
 
 	/*
-	* Advances the current token and the peek token.  If the end of the input is reached, it will 
-	* continuously return the Eof Token.
+	* Advances the current token and the peek token a given number of times.  If the end of the input is reached, it will continuously return the Eof Token.
 	* Precondition: tokens->size() > 0
+	* @param count the number of times to advance the token
 	*/
-	void Parser::nextToken()
+	void Parser::nextToken(uint32_t count)
 	{
-		if (currentTokenReadPos < tokens->size() -1) {
-			currentToken = tokens->at(currentTokenReadPos).get();
-			currentTokenPos = currentTokenReadPos;
+		for (uint32_t i = 0; i < count; i++) {
+			if (currentTokenReadPos < tokens->size() - 1) {
+				currentToken = tokens->at(currentTokenReadPos).get();
+				currentTokenPos = currentTokenReadPos;
 
-			currentTokenReadPos += 1;
-			peekToken = tokens->at(currentTokenReadPos).get();
-		}
-		else {
-			currentToken = tokens->at(currentTokenReadPos).get();
-			peekToken = currentToken;
+				currentTokenReadPos += 1;
+				peekToken = tokens->at(currentTokenReadPos).get();
+			}
+			else {
+				currentToken = tokens->at(currentTokenReadPos).get();
+				peekToken = currentToken;
+			}
 		}
 	}
 
@@ -339,6 +344,43 @@ namespace Delve::Script {
 			nextToken();
 			return expression;
 		}
+	}
+
+	/*
+	* Parses and If/Else expression.
+	*/
+	std::unique_ptr<Ast::Expression> Parser::parseIfStatement()
+	{
+		assert(currentToken->type == Token::Type::If);
+		std::unique_ptr<Ast::IfStatement> expression = std::make_unique<Ast::IfStatement>(currentToken);
+
+		if (peekToken->type != Token::Type::LParen) {
+			expectedTypeError(Token::Type::LParen, peekToken);
+			expression.reset(nullptr);
+			return expression;
+		}
+
+		nextToken();
+
+		expression->condition.reset(parseExpression(Precedence::Lowest));
+
+		if (peekToken->type != Token::Type::LBrace) {
+			expectedTypeError(Token::Type::LBrace, peekToken);
+			expression.reset(nullptr);
+			return expression;
+		}
+
+		nextToken();
+
+		expression->consequence = parseBlockStatement();
+
+		// else block is optional, if present then consume it and parse the alternative statement block.
+		if (peekToken->type == Token::Type::Else) {
+			nextToken(2);
+			expression->alternative = parseBlockStatement();
+		}
+
+		return expression;
 	}
 
 	/*

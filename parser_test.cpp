@@ -185,6 +185,23 @@ TEST(Parser, ParseBlockStatement)
 	}
 }
 
+TEST(Parser, ParseIfStatement)
+{
+	std::vector<std::string> inputs = {
+		"if(i==7){i + 2;}",
+		"if((i/3)==7){i - x*3;}",
+		"if(i==7) {i+4;} else {i - 7;}"
+	};
+
+	std::vector<std::string> expectedOutput = {
+		"if (i == 7) {\n(i + 2);\n}",
+		"if ((i / 3) == 7) {\n(i - (x * 3));\n}",
+		"if (i == 7) {\n(i + 4);\n} else {\n(i - 7);\n}"
+	};
+
+	compareStatementsToExpectedOutput(inputs, expectedOutput);
+}
+
 TEST(Parser, ParseBasicInfixExpressions)
 {
 	std::string code =

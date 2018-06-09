@@ -45,12 +45,13 @@ private:
 private:
 	void init();
 
-	void nextToken();
+	void nextToken(uint32_t count = 1);
 
 	std::unique_ptr<Ast::Statement> parseStatement();
 	std::unique_ptr<Ast::LetStatement> parseLetStatement();
 	std::unique_ptr<Ast::ReturnStatement> parseReturnStatement();
 	std::unique_ptr<Ast::ExpressionStatement> parseExpressionStatement();
+	std::unique_ptr<Ast::Expression> parseIfStatement();
 
 	std::unique_ptr<Ast::BlockStatement> parseBlockStatement();
 
