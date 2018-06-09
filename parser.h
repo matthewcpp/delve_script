@@ -56,7 +56,7 @@ private:
 	std::unique_ptr<Ast::BlockStatement> parseBlockStatement();
 
 	std::unique_ptr<Ast::Identifier> parseIdentifer();
-	Ast::Expression* parseExpression(Precedence precedence);
+	std::unique_ptr<Ast::Expression> parseExpression(Precedence precedence);
 	
 	void advanceUntil(Token::Type tokenType);
 
@@ -64,8 +64,8 @@ private:
 	void expectedTypeError(Token::Type expectedType, const Token* actualToken);
 
 private:
-	using PrefixParsingFunc = std::function<Ast::Expression*()>;
-	using InfixParsingFunc = std::function <Ast::Expression*(Ast::Expression*)>;
+	using PrefixParsingFunc = std::function<std::unique_ptr<Ast::Expression>()>;
+	using InfixParsingFunc = std::function <std::unique_ptr<Ast::Expression>(std::unique_ptr<Ast::Expression>)>;
 
 	std::unordered_map<Token::Type, PrefixParsingFunc> prefixParseFuncs;
 	std::unordered_map<Token::Type, InfixParsingFunc> infixParsingFuncs;
@@ -75,13 +75,13 @@ private:
 	void initParsingFuncs();
 
 private:
-	Ast::Identifier* parseIdentifierExpression();
-	Ast::Expression* parseIntegerLiteralExpression();
-	Ast::Expression* parseBooleanLiteralExpression();
-	Ast::Expression* parseFunctionLiteralExpression();
-	Ast::Expression* parseGroupedExpression();
-	Ast::Expression* parsePrefixExpression();
-	Ast::Expression* parseInfixExpression(Ast::Expression* leftExpression);
+	std::unique_ptr<Ast::Identifier> parseIdentifierExpression();
+	std::unique_ptr<Ast::IntegerLiteral> parseIntegerLiteralExpression();
+	std::unique_ptr<Ast::BooleanLiteral> parseBooleanLiteralExpression();
+	std::unique_ptr<Ast::FunctionLiteral> parseFunctionLiteralExpression();
+	std::unique_ptr<Ast::Expression> parseGroupedExpression();
+	std::unique_ptr<Ast::PrefixExpression> parsePrefixExpression();
+	std::unique_ptr<Ast::InfixExpression> parseInfixExpression(std::unique_ptr<Ast::Expression> leftExpression);
 
 private:
 	const Token::Vector* tokens;
