@@ -75,9 +75,10 @@ private:
 	void initParsingFuncs();
 
 private:
-	Ast::Expression* parseIdentifierExpression();
+	Ast::Identifier* parseIdentifierExpression();
 	Ast::Expression* parseIntegerLiteralExpression();
 	Ast::Expression* parseBooleanLiteralExpression();
+	Ast::Expression* parseFunctionLiteralExpression();
 	Ast::Expression* parseGroupedExpression();
 	Ast::Expression* parsePrefixExpression();
 	Ast::Expression* parseInfixExpression(Ast::Expression* leftExpression);

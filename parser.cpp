@@ -212,7 +212,7 @@ namespace Delve::Script {
 
 	/*
 	* Parses the next expression from the input token stream.
-	* Postcondition: the current token will be set to the final token consumed by parsing the appropriate expression.  This will most likely be a ";" or a "}"
+	* Postcondition: the current token will be set to the final token consumed by parsing the appropriate expression.  This will most likely be the token before a";" or "}"
 	*/
 	Ast::Expression* Parser::parseExpression(Precedence precedence) {
 		auto result = prefixParseFuncs.find(currentToken->type);
@@ -278,7 +278,7 @@ namespace Delve::Script {
 		errors.push_back(message);
 	}
 
-	Ast::Expression* Parser::parseIdentifierExpression()
+	Ast::Identifier* Parser::parseIdentifierExpression()
 	{
 		assert(currentToken->type == Token::Type::Identifier);
 		return new Ast::Identifier{ this->currentToken };
@@ -299,6 +299,52 @@ namespace Delve::Script {
 		auto* booleanLiteral = new Ast::BooleanLiteral{ currentToken };
 
 		return booleanLiteral;
+	}
+
+	Ast::Expression* Parser::parseFunctionLiteralExpression()
+	{
+		assert(currentToken->type == Token::Type::Function);
+		auto function = std::make_unique<Ast::FunctionLiteral>(currentToken);
+		nextToken();
+
+		if (currentToken->type != Token::Type::LParen) {
+			expectedTypeError(Token::Type::LParen, peekToken);
+			function.reset(nullptr);
+			return nullptr;
+		}
+
+		nextToken();
+
+		//parse the parameter list
+		while (currentToken->type != Token::Type::RParen) {
+			if (function->parameters.size() > 0) {
+				if (currentToken->type == Token::Type::Comma) {
+					nextToken();
+				}
+				else {
+					expectedTypeError(Token::Type::Comma, currentToken);
+					function.reset(nullptr);
+					return nullptr;
+				}
+			}
+
+			if (currentToken->type == Token::Type::Identifier) {
+				function->parameters.emplace_back(parseIdentifierExpression());
+			}
+			else {
+				expectedTypeError(Token::Type::Identifier, peekToken);
+				function.reset(nullptr);
+				return nullptr;
+			}
+
+			nextToken();
+		}
+
+		nextToken();
+
+		function->body = parseBlockStatement();
+
+		return function.release();
 	}
 
 	Ast::Expression* Parser::parsePrefixExpression()
@@ -352,7 +398,7 @@ namespace Delve::Script {
 	std::unique_ptr<Ast::Expression> Parser::parseIfStatement()
 	{
 		assert(currentToken->type == Token::Type::If);
-		std::unique_ptr<Ast::IfStatement> expression = std::make_unique<Ast::IfStatement>(currentToken);
+		auto expression = std::make_unique<Ast::IfStatement>(currentToken);
 
 		if (peekToken->type != Token::Type::LParen) {
 			expectedTypeError(Token::Type::LParen, peekToken);
@@ -377,6 +423,13 @@ namespace Delve::Script {
 		// else block is optional, if present then consume it and parse the alternative statement block.
 		if (peekToken->type == Token::Type::Else) {
 			nextToken(2);
+
+			if (currentToken->type != Token::Type::LBrace) {
+				expectedTypeError(Token::Type::LBrace, currentToken);
+				expression.reset(nullptr);
+				return expression;
+			}
+
 			expression->alternative = parseBlockStatement();
 		}
 
@@ -434,6 +487,10 @@ namespace Delve::Script {
 
 		prefixParseFuncs[Token::Type::LParen] = [this]() ->Ast::Expression* {
 			return this->parseGroupedExpression();
+		};
+
+		prefixParseFuncs[Token::Type::Function] = [this]() ->Ast::Expression* {
+			return this->parseFunctionLiteralExpression();
 		};
 
 		auto parseInfix = [this](Ast::Expression* expression) -> Ast::Expression* {

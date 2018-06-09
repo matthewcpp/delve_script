@@ -141,6 +141,30 @@ struct BlockStatement : public Statement
 
 };
 
+struct FunctionLiteral : public Expression
+{
+	FunctionLiteral(const Token* t) : Expression(t) {}
+	std::vector<std::unique_ptr<Identifier>> parameters;
+	std::unique_ptr<BlockStatement> body;
+
+	virtual std::string toString() const override
+	{
+		std::string str = "function (";
+
+		for (size_t i = 0; i < parameters.size(); ++i) {
+			if (i) {
+				str.append(", ");
+			}
+
+			str.append(parameters[i]->toString());
+		}
+
+		str.append(") {\n").append(body->toString()).append("}");
+
+		return str;
+	}
+};
+
 struct IfStatement : public Statement
 {
 	IfStatement(const Token* t) : Expression(t) {}

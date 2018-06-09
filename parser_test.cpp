@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
+#include <iterator>
 
 #include <gtest/gtest.h>
 
@@ -281,6 +283,50 @@ TEST(Parser, Precedence)
 	};
 
 	compareStatementsToExpectedOutput(statements, expectedOutput);
+}
+
+TEST(Parser, FunctionLiteralParameterList)
+{
+	std::vector<std::string> input = {
+		"function (x,y){return x + y;};",
+		"function (){\n\treturn 55662187;\n}"
+	};
+
+	std::vector<std::string> paramLists = {
+		"x y",
+		""
+	};
+
+	Lexer lexer;
+	Parser parser;
+
+	for (size_t i = 0; i < input.size(); ++i) {
+		lexer.tokenize(input[i]);
+		parser.parse(lexer.tokens());
+
+		auto program = parser.getProgram();
+
+		ASSERT_EQ(program->statements.size(), 1);
+		ASSERT_EQ(program->statements[0]->token->type, Token::Type::Function);
+
+		auto expression_statement = dynamic_cast<Ast::ExpressionStatement*>(program->statements[0].get());
+		ASSERT_FALSE(expression_statement == nullptr);
+
+		ASSERT_EQ(expression_statement->token->type, Token::Type::Function);
+		auto function = dynamic_cast<Ast::FunctionLiteral*>(expression_statement->expression.get());
+		ASSERT_FALSE(function == nullptr);
+
+		//split literals from space separated string into vector
+		std::vector<std::string> params;
+		std::istringstream iss(paramLists[i]);
+		std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter(params));
+
+		ASSERT_EQ(function->parameters.size(), params.size());
+
+		for (size_t p = 0; p < function->parameters.size(); ++p) {
+			ASSERT_EQ(function->parameters[p]->token->literal, params[p]);
+		}
+	}
 }
 
 TEST(Parser, GroupedExpression)
