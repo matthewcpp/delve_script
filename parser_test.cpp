@@ -288,8 +288,8 @@ TEST(Parser, Precedence)
 TEST(Parser, FunctionLiteralParameterList)
 {
 	std::vector<std::string> input = {
-		"function (x,y){return x + y;};",
-		"function (){\n\treturn 55662187;\n}"
+		"function(x,y){return x + y;};",
+		"function(){\n\treturn 55662187;\n};"
 	};
 
 	std::vector<std::string> paramLists = {
@@ -348,6 +348,27 @@ TEST(Parser, GroupedExpression)
 	};
 
 	compareStatementsToExpectedOutput(statements, expectedOutput);
+}
+
+TEST(Parser, CallExpression)
+{
+	std::vector<std::string> inputs = {
+		"add(a,b);",
+		"subtract(a,\n\n\t7);",
+		"add(a+b, c);",
+		"foo(bar());",
+		"do_stuff(a,b,function(x,y){return x*y;});"
+	};
+
+	std::vector<std::string> expectedOutput = {
+		"add(a, b);",
+		"subtract(a, 7);",
+		"add((a + b), c);",
+		"foo(bar());",
+		"do_stuff(a, b, function(x, y) {\nreturn (x * y);\n});"
+	};
+
+	compareStatementsToExpectedOutput(inputs, expectedOutput);;
 }
 
 

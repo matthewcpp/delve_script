@@ -58,12 +58,10 @@ private:
 	std::unique_ptr<Ast::LetStatement> parseLetStatement();
 	std::unique_ptr<Ast::ReturnStatement> parseReturnStatement();
 	std::unique_ptr<Ast::ExpressionStatement> parseExpressionStatement();
-	std::unique_ptr<Ast::Expression> parseIfStatement();
-
+	std::unique_ptr<Ast::IfStatement> parseIfStatement();
 	std::unique_ptr<Ast::BlockStatement> parseBlockStatement();
 
-	std::unique_ptr<Ast::Identifier> parseIdentifer();
-	std::unique_ptr<Ast::Expression> parseExpression(Precedence precedence);
+
 	
 	void advanceUntil(Token::Type tokenType);
 
@@ -81,6 +79,8 @@ private:
 	void initParsingFuncs();
 
 private:
+	std::unique_ptr<Ast::Expression> parseExpression(Precedence precedence);
+
 	std::unique_ptr<Ast::Identifier> parseIdentifierExpression();
 	std::unique_ptr<Ast::IntegerLiteral> parseIntegerLiteralExpression();
 	std::unique_ptr<Ast::BooleanLiteral> parseBooleanLiteralExpression();
@@ -88,6 +88,7 @@ private:
 	std::unique_ptr<Ast::Expression> parseGroupedExpression();
 	std::unique_ptr<Ast::PrefixExpression> parsePrefixExpression();
 	std::unique_ptr<Ast::InfixExpression> parseInfixExpression(std::unique_ptr<Ast::Expression> leftExpression);
+	std::unique_ptr<Ast::CallExpression> parseCallExpression(std::unique_ptr<Ast::Expression> leftExpression);
 
 private:
 	const Token::Vector* tokens;

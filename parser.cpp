@@ -124,7 +124,7 @@ namespace Delve::Script {
 		nextToken();
 
 		if (currentToken->type == Token::Type::Identifier) {
-			statement->identifier = parseIdentifer();
+			statement->identifier = parseIdentifierExpression();
 		}
 		else {
 			expectedTypeError(Token::Type::Identifier, currentToken);
@@ -140,8 +140,10 @@ namespace Delve::Script {
 
 		statement->expression = std::move(parseExpression(Precedence::Lowest));
 
-		assert(peekToken->type == Token::Type::Semicolon);
 		nextToken();
+		if (currentToken->type != Token::Type::Semicolon) {
+			expectedTypeError(Token::Type::Semicolon, currentToken);
+		}
 	
 		return statement;
 	}
@@ -155,8 +157,10 @@ namespace Delve::Script {
 
 		statement->expression = std::move(parseExpression(Precedence::Lowest));
 
-		assert(peekToken->type == Token::Type::Semicolon);
 		nextToken();
+		if (currentToken->type != Token::Type::Semicolon) {
+			expectedTypeError(Token::Type::Semicolon, currentToken);
+		}
 
 		return statement;
 	}
@@ -177,6 +181,9 @@ namespace Delve::Script {
 		}
 
 		nextToken();
+		if (currentToken->type != Token::Type::Semicolon) {
+			expectedTypeError(Token::Type::Semicolon, currentToken);
+		}
 
 		return statement;
 	}
@@ -226,12 +233,6 @@ namespace Delve::Script {
 		}
 
 		return leftExpression;
-	}
-
-	std::unique_ptr<Ast::Identifier> Parser::parseIdentifer() {
-		assert(currentToken->type == Token::Type::Identifier);
-
-		return std::make_unique<Ast::Identifier>(currentToken);
 	}
 
 	/*
@@ -325,6 +326,32 @@ namespace Delve::Script {
 		return function;
 	}
 
+	std::unique_ptr<Ast::CallExpression> Parser::parseCallExpression(std::unique_ptr<Ast::Expression> leftExpression)
+	{
+		assert(currentToken->type == Token::Type::LParen);
+		auto callExpression = std::make_unique<Ast::CallExpression>(currentToken);
+		callExpression->function = std::move(leftExpression);
+
+		nextToken();
+		while (currentToken->type != Token::Type::RParen) {
+			if (callExpression->arguments.size() > 0) {
+				if (currentToken->type == Token::Type::Comma) {
+					nextToken();
+				}
+				else {
+					expectedTypeError(Token::Type::Comma, currentToken);
+				}
+			}
+
+			callExpression->arguments.emplace_back(parseExpression(Precedence::Lowest));
+
+			// parsing argument expression leaves us at the last token of that expression.
+			nextToken();
+		}
+
+		return callExpression;
+	}
+
 	std::unique_ptr<Ast::PrefixExpression> Parser::parsePrefixExpression()
 	{
 		assert(currentToken->type == Token::Type::Negate || currentToken->type == Token::Type::Minus);
@@ -370,7 +397,7 @@ namespace Delve::Script {
 	/*
 	* Parses and If/Else expression.
 	*/
-	std::unique_ptr<Ast::Expression> Parser::parseIfStatement()
+	std::unique_ptr<Ast::IfStatement> Parser::parseIfStatement()
 	{
 		assert(currentToken->type == Token::Type::If);
 		auto expression = std::make_unique<Ast::IfStatement>(currentToken);
@@ -462,6 +489,7 @@ namespace Delve::Script {
 			return this->parseFunctionLiteralExpression();
 		};
 
+		// this function handles all generic infix operations, i.e.  a + b, a - b, a == b, etc
 		auto parseInfix = [this](std::unique_ptr<Ast::Expression> expression) -> std::unique_ptr<Ast::Expression> {
 			return this->parseInfixExpression(std::move(expression));
 		};
@@ -469,9 +497,13 @@ namespace Delve::Script {
 		for (auto& tokenType : infixTokenTypes) {
 			infixParsingFuncs[tokenType] = parseInfix;
 		}
+
+		infixParsingFuncs[Token::Type::LParen] = [this](std::unique_ptr<Ast::Expression> expression) -> std::unique_ptr<Ast::Expression> {
+			return this->parseCallExpression(std::move(expression));
+		};
 	}
 
-	// this structure holds all the tokens that need to be registers for infix expression parsing
+	// this structure holds all the tokens that need to be registered for infix expression parsing
 	std::vector<Token::Type> Parser::infixTokenTypes = { Token::Type::Plus, Token::Type::Minus,
 		Token::Type::Divide, Token::Type::Multiply, Token::Type::Equal, Token::Type::NotEqual,
 		Token::Type::LessThan, Token::Type::GreaterThan
@@ -487,6 +519,7 @@ namespace Delve::Script {
 		{ Token::Type::Minus, Parser::Precedence::Sum },
 		{ Token::Type::Divide, Parser::Precedence::Product },
 		{ Token::Type::Multiply, Parser::Precedence::Product },
+		{ Token::Type::LParen, Parser::Precedence::Call}
 	};
 
 }

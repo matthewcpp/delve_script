@@ -115,6 +115,33 @@ struct ExpressionStatement : public Statement
 		return expression->toString() + ';';
 	}
 };
+
+struct CallExpression : public Expression
+{
+	CallExpression(const Token* t) : Statement(t) {}
+	
+	std::unique_ptr<Expression> function;
+	std::vector<std::unique_ptr<Expression>> arguments;
+
+	virtual std::string toString() const override
+	{
+		std::string str = function->toString();
+		str.append("(");
+
+		for (size_t i = 0; i < arguments.size(); ++i) {
+			if (i) {
+				str.append(", ");
+			}
+
+			str.append(arguments[i]->toString());
+		}
+
+		str.append(")");
+
+		return str;
+	}
+};
+
 namespace Internal {
 inline std::string statementVectorToString(const std::vector<std::unique_ptr<Statement>>& statements)
 {
@@ -149,7 +176,7 @@ struct FunctionLiteral : public Expression
 
 	virtual std::string toString() const override
 	{
-		std::string str = "function (";
+		std::string str = "function(";
 
 		for (size_t i = 0; i < parameters.size(); ++i) {
 			if (i) {
