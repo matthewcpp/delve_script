@@ -52,12 +52,13 @@ namespace Delve::Script {
 		program = std::make_unique<Ast::Program>();
 
 		while (currentToken->type != Token::Type::Eof) {
-			std::unique_ptr<Ast::Statement> statement = parseStatement();
-
-			if (statement) {
+			try {
+				std::unique_ptr<Ast::Statement> statement = parseStatement();
 				program->statements.push_back(std::move(statement));
 			}
-			else {
+			catch (const ParsingError& error) {
+				errors.push_back(error.what());
+
 				// if there was error parsing the statement, we will eat all the tokens that
 				// remain from the error location to the end of that statement.
 				advanceUntil(Token::Type::Semicolon);
@@ -124,25 +125,15 @@ namespace Delve::Script {
 
 		if (currentToken->type == Token::Type::Identifier) {
 			statement->identifier = parseIdentifer();
-
-			if (!statement->identifier) {
-				statement.reset(nullptr);
-				return statement;
-			}
 		}
 		else {
 			expectedTypeError(Token::Type::Identifier, currentToken);
-			statement.reset(nullptr);
-			return statement;
 		}
 
 		nextToken();
 		
 		if (currentToken->type != Token::Type::Assign) {
 			expectedTypeError(Token::Type::Assign, currentToken);
-
-			statement.reset(nullptr);
-			return statement;
 		}
 
 		nextToken();
@@ -270,12 +261,7 @@ namespace Delve::Script {
 		std::ostringstream error;
 		error << "Expected " << Token::getTokenName(expectedType) << " at " << actualToken->lineNum << ", " << actualToken->colNum << '.';
 
-		parseError(error.str());
-	}
-
-	void Parser::parseError(const std::string& message)
-	{
-		errors.push_back(message);
+		throw ParsingError(error.str());
 	}
 
 	std::unique_ptr<Ast::Identifier> Parser::parseIdentifierExpression()
@@ -307,8 +293,6 @@ namespace Delve::Script {
 
 		if (currentToken->type != Token::Type::LParen) {
 			expectedTypeError(Token::Type::LParen, peekToken);
-			function.reset(nullptr);
-			return function;
 		}
 
 		nextToken();
@@ -321,8 +305,6 @@ namespace Delve::Script {
 				}
 				else {
 					expectedTypeError(Token::Type::Comma, currentToken);
-					function.reset(nullptr);
-					return function;
 				}
 			}
 
@@ -331,8 +313,6 @@ namespace Delve::Script {
 			}
 			else {
 				expectedTypeError(Token::Type::Identifier, peekToken);
-				function.reset(nullptr);
-				return function;
 			}
 
 			nextToken();
@@ -347,8 +327,6 @@ namespace Delve::Script {
 
 	std::unique_ptr<Ast::PrefixExpression> Parser::parsePrefixExpression()
 	{
-		//TODO: better handling of case where right expression fails to parse?
-
 		assert(currentToken->type == Token::Type::Negate || currentToken->type == Token::Type::Minus);
 		auto prefixExpression = std::make_unique<Ast::PrefixExpression>(currentToken);
 
@@ -380,7 +358,6 @@ namespace Delve::Script {
 
 		if (peekToken->type != Token::Type::RParen) {
 			expectedTypeError(Token::Type::RParen, peekToken);
-			expression.reset(nullptr);
 		}
 		else {
 			// Here we ensure that when we are done parsing this infix token the current token is set to the Rparen of this statement.
@@ -400,8 +377,6 @@ namespace Delve::Script {
 
 		if (peekToken->type != Token::Type::LParen) {
 			expectedTypeError(Token::Type::LParen, peekToken);
-			expression.reset(nullptr);
-			return expression;
 		}
 
 		nextToken();
@@ -410,8 +385,6 @@ namespace Delve::Script {
 
 		if (peekToken->type != Token::Type::LBrace) {
 			expectedTypeError(Token::Type::LBrace, peekToken);
-			expression.reset(nullptr);
-			return expression;
 		}
 
 		nextToken();
@@ -424,8 +397,6 @@ namespace Delve::Script {
 
 			if (currentToken->type != Token::Type::LBrace) {
 				expectedTypeError(Token::Type::LBrace, currentToken);
-				expression.reset(nullptr);
-				return expression;
 			}
 
 			expression->alternative = parseBlockStatement();

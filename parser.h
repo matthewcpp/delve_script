@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
+#include <exception>
 
 namespace Delve::Script {
 
@@ -43,6 +44,12 @@ private:
 	static Precedence getTokenPrecedence(const Token* token);
 
 private:
+	class ParsingError : public std::runtime_error {
+	public:
+		ParsingError(const std::string& desc) : std::runtime_error(desc) {}
+	};
+
+private:
 	void init();
 
 	void nextToken(uint32_t count = 1);
@@ -60,7 +67,6 @@ private:
 	
 	void advanceUntil(Token::Type tokenType);
 
-	void parseError(const std::string& message);
 	void expectedTypeError(Token::Type expectedType, const Token* actualToken);
 
 private:
